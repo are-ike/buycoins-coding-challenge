@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA==" crossorigin="anonymous" />
+    <link rel="shortcut icon" href="img/GitHub-Mark-32px.png" type="image/x-icon">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Your Repositories</title>
+</head>
+<body>
+    <header>
+        <div id="header">
+            <span class="iconify" data-icon="octicon:three-bars-16" id="menu" data-inline="false"></span>
+            <a id="logo" href="#"><img src="/img/GitHub-Mark-Light-32px.png" alt="logo"></a>
+            <a href="#"><span class="iconify" data-icon="octicon:bell-16" id="bell" data-inline="false"></span></a>
+        </div>
+        <nav class="d-none">
+            <input type="text" placeholder="Search or jump to...">
+            <a href="#" class="nav-link">Dashboard</a>
+            <a href="#" class="nav-link">Pull requests</a>
+            <a href="#" class="nav-link">Issues</a>
+            <a href="#" class="nav-link">Marketplace</a>
+            <a href="#" class="nav-link">Explore</a>
+            <a href="#" class="nav-link"><div id="nav-pic"><img src="" alt="profile pic"></div></a>
+            <a href="#" class="nav-link"><span class="iconify" data-icon="octicon:sign-out-16" data-inline="false"></span>Sign out</a>
+        </nav>
+    </header>
+    <div class="container">
+        <section id="profile">
+            <div id="profile-info">
+                <div id="profile-pic"><img src="" alt="profile pic"></div>
+                <div id="profile-name"></div>
+            </div>
+            <div id="status-container">
+                <span class="iconify" data-icon="octicon:smiley-16" data-inline="false"></span>
+                <input type="text" id="status" value="Set status">
+            </div>
+            <a href="#" class="btn" id="edit">Edit profile</a>
+            <div id="edit-profile" class="d-none">
+                <textarea cols="30" rows="3" placeholder="Add a bio"></textarea>
+                <input type="text" placeholder="Company">
+                <input type="text" placeholder="Location">
+                <input type="text" placeholder="Website">
+                <input type="text" placeholder="Twitter username">
+                <div id="profile-btns">
+                    <a href="#" id="save" class="btn bg-green">Save</a>
+                    <a href="#" id="cancel" class="btn">Cancel</a>
+                </div>
+            </div>
+        </section>
+        <section id="tabs">
+            <a href="#" class="tab">Overview</a>
+            <a href="#" class="tab">Repositories <div class="counter">11</div></a>
+            <a href="#" class="tab">Projects</a>
+            <a href="#" class="tab">Packages</a>
+        </section>
+    </div>
+        <section id="search">
+            <div class="container">
+                <input type="text" id="find" placeholder="Find a repository...">
+                <div id="btns">
+                    <a href="#" class="btn" id="type">Type: <span> All</span><i class="fas fa-caret-down"></i></a>
+                    <a href="#" class="btn" id="lang">Language: <span> All</span><i class="fas fa-caret-down"></i></a>
+                    <a href="#" class="btn bg-green"><span class="iconify" data-icon="octicon:repo-24" data-inline="false"></span>New</a>
+                </div>
+            </div>
+        </section>
+    <div class="container">
+        <section id="repos"></section>
+
+        <footer>
+            &copy; 2020 Github, Inc.
+            <a href="#" class="footer-link">Terms</a>
+            <a href="#" class="footer-link">Privacy</a>
+            <a href="#" class="footer-link">Security</a>
+            <a href="#" class="footer-link">Status</a>
+            <a href="#" class="footer-link">Help</a>
+            <a href="#" class="footer-link">Contact Github</a>
+            <a href="#" class="footer-link">Pricing</a>
+            <a href="#" class="footer-link">API</a>
+            <a href="#" class="footer-link">Training</a>
+            <a href="#" class="footer-link">Blog</a>
+            <a href="#" class="footer-link">About</a>
+        </footer>
+    </div>
+    
+    
+    <script src="https://code.iconify.design/1/1.0.7/iconify.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
+
+</div>
