@@ -5,7 +5,7 @@ async function getData(string){
     try{
         const response = await fetch('https://api.github.com/graphql',
         {method: "POST",
-        headers: {'Authorization' : 'bearer 36bb42d5ffa9e5c4b27287e016dcc34c894145a5'},
+        headers: {'Authorization' : 'bearer 79736b679c9b0c3d130fe8ab40c5d61ce4699b11'},
         body: JSON.stringify({query : string})
         });
         const json = await response.json();
