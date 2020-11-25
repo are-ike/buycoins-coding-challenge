@@ -159,7 +159,7 @@ const displayRepos = (res) => {
     const unstar = '<span class="iconify unstar" data-icon="octicon:star-fill-16" data-inline="false"></span>Unstar',
           star = '<span class="iconify" data-icon="octicon:star-16" data-inline="false"></span>Star';
     document.querySelectorAll('.star').forEach((s, i) => {
-        s.addEventListener('click', () => {
+        s.addEventListener('click', (e) => {
             if(s.children[0].classList.contains('unstar')){
                 s.innerHTML = star;
                 s.style.padding = '.3rem 0';
@@ -169,6 +169,7 @@ const displayRepos = (res) => {
                 s.style.padding = '.3rem .4rem';
                 s.style.width = '80px';
            }
+           e.preventDefault();
         });
 
     });
