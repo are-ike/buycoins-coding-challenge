@@ -9,8 +9,9 @@
     <link rel="stylesheet" href="css/style.css" media="screen and (min-width: 768px)">
     <title>Your Repositories</title>
 </head>
-<body>
-    <div class="main">
+<body class="center-loader">
+    <img id="loader" src="img/ajax-loader.gif" alt="">
+    <div class="main d-none">
     <header>
         <div id="header">
             <span class="iconify" data-icon="octicon:three-bars-16" id="menu" data-inline="false"></span>
@@ -18,10 +19,47 @@
                 <a id="logo" href="#"><span class="iconify" data-icon="octicon:mark-github-16" data-inline="false"></span></a>
             </div>
             <div class="header-group">
-                <a href="#"><span class="iconify" data-icon="octicon:bell-16" id="bell" data-inline="false"></span></a>
-                <a href="#" class="d-none"><span class="iconify" data-icon="octicon:plus-16" data-inline="false"></span><span class="iconify" data-icon="octicon:triangle-down-16" data-inline="false"></span></a>
+                <a href="#"><span class="iconify" data-icon="octicon:bell-16" id="bell" data-inline="false"></span>
+                    <div class="notification d-none">
+                        You have no unread notifications
+                    </div></a>
+                <a href="#" id="plus" class="d-none"><span class="iconify" data-icon="octicon:plus-16" data-inline="false"></span><span class="iconify" data-icon="octicon:triangle-down-16" data-inline="false"></span></a>
+                
+                <a href="#" id="p-pic" class="d-none"><div class="nav-pic"><img src="" alt="profile pic"></div><span class="iconify" data-icon="octicon:triangle-down-16" data-inline="false"></span></a>
+                
+            </div>
+            <div class="overlay d-none">
+                <div class="nav-dropdown">
+                    <div class="nav-dropdown-item">New repository</div>
+                    <div class="nav-dropdown-item">Import repository</div>
+                    <div class="nav-dropdown-item">New gist</div>
+                    <div class="nav-dropdown-item">New organization</div>
+                    <div class="nav-dropdown-item">New project</div>
+                </div>
 
-                <a href="#" class="d-none"><div class="nav-pic"><img src="" alt="profile pic"></div><span class="iconify" data-icon="octicon:triangle-down-16" data-inline="false"></span></a>
+            </div>
+            <div class="overlay d-none">
+                <div class="nav-dropdown">
+                    <section>Signed in as </section>
+                    <section>
+                        <div class="status"><span class="iconify" data-icon="octicon:smiley-16" data-inline="false"></span>Set status</div>
+                    </section>
+                    <section>
+                        <div class="nav-dropdown-item">Your profile</div>
+                        <div class="nav-dropdown-item">Your repositories</div>
+                        <div class="nav-dropdown-item">Your organizations</div>
+                        <div class="nav-dropdown-item">Your projects</div>
+                        <div class="nav-dropdown-item">Your stars</div>
+                        <div class="nav-dropdown-item">Your gists</div>
+                    </section>
+                    <section>
+                        <div class="nav-dropdown-item">Upgrade</div>
+                        <div class="nav-dropdown-item">Feature preview</div>
+                        <div class="nav-dropdown-item">Help</div>
+                        <div class="nav-dropdown-item">Settings</div>
+                        <div class="nav-dropdown-item">Sign out</div>
+                    </section>
+                </div>
             </div>
         </div>
         <nav class="d-none">
@@ -39,14 +77,20 @@
             <a href="#" class="nav-link hide"><span class="iconify" data-icon="octicon:sign-out-16" data-inline="false"></span>Sign out</a>
         </nav>
     </header>
+    
         <div class="display">
             <div class="container" id="left">
                 <section id="profile">
                     <div id="profile-info">
-                        <div id="profile-pic"><img src="" alt="profile pic"></div>
+                        <div id="profile-pic"><img src="" alt="profile pic">
+                            <div class="notification d-none">
+                                Change your avatar
+                            </div>
+                        </div>
+                            
                         <div id="profile-name"></div>
                     </div>   
-                    <div id="status"><span class="iconify" data-icon="octicon:smiley-16" data-inline="false"></span>Set status</div>
+                    <div class="status"><span class="iconify" data-icon="octicon:smiley-16" data-inline="false"></span>Set status</div>
                     <div class="bio"></div>
                     <a href="#" class="btn" id="edit">Edit profile</a>
                     <div id="edit-profile" class="d-none">
@@ -78,16 +122,50 @@
                         <div class="info-item" id="site"></div>
                         <div class="info-item" id="twitter_username"></div>
                     </div>
+                    <div  class="d-none">
+                        <div id="fllw">
+                            <div class="group">
+                                <span class="iconify" data-icon="octicon:people-16" data-inline="false"></span>
+                                <p><span class="count"></span> followers</p>
+                            </div>
+                            <span class="iconify dot" data-icon="octicon:dot-fill-16" data-inline="false"></span>
+                            <div class="group">
+                                <p><span class="count"></span> following</p>
+                            </div>
+                            <span class="iconify dot" data-icon="octicon:dot-fill-16" data-inline="false"></span>
+                            <div class="group">
+                                <span class="iconify" data-icon="octicon:star-16" data-inline="false"></span><p><span class="star-count"></span></p>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="d-none">
+                        <div id="org-container">
+                            <p>Organizations</p>
+                            <div><img src="https://avatars3.githubusercontent.com/u/62646362?s=60&v=4" alt="org"></div>
+                        </div>
+
+                    </div>
                 </section>
             </div>
-            
-            <section id="tabs">
-                <a href="#" class="tab"><span class="iconify" data-icon="octicon:book-16" data-inline="false"></span>Overview</a>
-                <a href="#" class="tab"><span class="iconify" data-icon="octicon:repo-16" data-inline="false"></span></span>Repositories <div class="counter">11</div></a>
-                <a href="#" class="tab"><span class="iconify" data-icon="octicon:project-16" data-inline="false"></span>Projects</a>
-                <a href="#" class="tab"><span class="iconify" data-icon="octicon:package-16" data-inline="false"></span>Packages</a>
+            <div class="fixed-nav">
                 
-            </section>
+                <section id="tabs">
+                    <div class="d-none">
+                        <div id="nav-p">
+                            <div class="nav-pic">
+                                <img src="" alt="">
+                            </div>
+                        </div>
+                    </div>
+                    <a href="#" class="tab"><span class="iconify" data-icon="octicon:book-16" data-inline="false"></span>Overview</a>
+                    <a href="#" class="tab"><span class="iconify" data-icon="octicon:repo-16" data-inline="false"></span></span>Repositories <div class="counter"></div></a>
+                    <a href="#" class="tab"><span class="iconify" data-icon="octicon:project-16" data-inline="false"></span>Projects</a>
+                    <a href="#" class="tab"><span class="iconify" data-icon="octicon:package-16" data-inline="false"></span>Packages</a>
+                    
+                </section>
+
+            </div>
             <div class="container" id="right">
                 <section id="search">
                     <input type="text" id="find" placeholder="Find a repository...">
@@ -151,13 +229,13 @@
                     <div id="checkbox">
                         <input type="checkbox" id="busy" value="hi">Busy
                     </div>
-                    <p id="p" class="container">When others mention you, assign you, or request your review, GitHub will let them know that you have limited availability.</p>
+                    <p class="p" class="container">When others mention you, assign you, or request your review, GitHub will let them know that you have limited availability.</p>
                 </div>
                 <div id="options">
-                    <div class="status">
+                    <div class="status-option">
                         Clear status <a href="#"  class="btn" id="clear-status">Never<i class="fas fa-caret-down"></i></a>
                     </div>
-                    <div class="status">
+                    <div class="status-option">
                         Visible to
                         <a href="#" class="btn" id="visible-status">Everyone<i class="fas fa-caret-down"></i></a>
                     </div>
@@ -168,7 +246,7 @@
                     <a href="#" class="btn" id="clr">Clear status</a>
                 </div>
             </div>
-            <div class="d-none">
+            <div class="overlay d-none">
                 <div class="dropdown" id="one">
                     <a href="#" class="dropdown-option first-option"><p>Never</p><p>Keep this status until you clear your status or edit your status</p></a>
                     <a href="#" class="dropdown-option">in 30 minutes</a>
@@ -178,10 +256,10 @@
                     <a href="#" class="dropdown-option">this week</a>
                 </div>
             </div>
-            <div class="d-none">
+            <div class="overlay d-none">
                 <div class="dropdown" id="two">
                     <a href="#" class="dropdown-option first-option"><p>Everyone</p><p>Your status will be visible to everyone</p></a>
-                    <a href="#" class="dropdown-option"><div id="org"><img id="org-img" src="https://avatars3.githubusercontent.com/u/62646362?s=60&v=4" alt="org"></div>CDC Unilag</a>
+                    <a href="#" class="dropdown-option"><div class="org"><img id="org-img" src="https://avatars3.githubusercontent.com/u/62646362?s=60&v=4" alt="org"></div>CDC Unilag</a>
                     
                 </div>
             </div>
@@ -210,8 +288,8 @@
                 <p id="top">Select type<span class="iconify" data-icon="octicon:x-16" data-inline="false" id="close"></span></p>
                 <div id="modal-list">
                 <div class="modal-item"><span class="iconify" data-icon="octicon:check-16" data-inline="false"></span><p class="checked">All</p></div>
-                    <div class="modal-item"><p>CSS</p></div>
                     <div class="modal-item"><p>Javascript</p></div>
+                    <div class="modal-item"><p>CSS</p></div>
                 </div>
             </div>
         </div>

@@ -9,10 +9,16 @@ body, html{
     height: 100%;
     width: 100%;
 }
-
+.center-loader{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#loader{
+    height: 2rem;
+}
 .container{
     padding: 0 16px;
-    overflow-y: auto;
 }
 :root{
     --main-color: #24292e;
@@ -46,7 +52,7 @@ span{
     color: var(--main-color);
     margin-left: 5px;
 }
-input, textarea, #status, .nav-input{
+input, textarea, .status, .nav-input{
     width: 100%;
     border-radius: 6px;
     border: 1px solid var(--white-color);
@@ -61,6 +67,9 @@ input, textarea, #status, .nav-input{
     background-color: #2ea44f;
     color: white;
 }
+.bg-green:hover{
+    background-color: #2a9749;
+}
 .yellow{
     background-color: #f1e05a;
 }
@@ -70,6 +79,10 @@ input, textarea, #status, .nav-input{
 .set{
     opacity: 0.4;
     cursor: default;
+}
+.bold{
+    font-weight: 600;
+    margin-left: 0.25rem;
 }
 /* Header */
 #header{
@@ -102,12 +115,108 @@ input, textarea, #status, .nav-input{
     font-size: 16px;
     margin-top: 0.7rem;
 }
+.header-group:nth-child(2){
+    width: 40px;
+    height: 32px;
+}
+.header-group:nth-child(3) a{
+    position: relative;
+}
+
 #logo{
-    font-size: 105px;
+    /* font-size: 105px; */
     display: flex;
     cursor: default;
-    padding: 0 35%;
+    /* padding: 0 35%; */
     margin-top: 0rem;
+    font-size: 32px;
+}
+header .notification{
+    right: 0.5rem;
+    top: 50px;
+}
+.notification{
+    color: white;
+    font-size: 11px;
+    padding: 0.4rem;
+    border-radius: 6px;
+    position: fixed;
+    background-color: var(--main-color);
+}
+.overlay{
+    position: absolute;
+    z-index: 100;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    height: 1745px;
+    width: 100%;
+    background-color: transparent;
+}
+.nav-dropdown{
+    position: absolute;
+    top: 7.9vh;
+    background-color: white;
+    width: 158px;
+    border-radius: 6px;
+    font-size: 14px;
+    line-height: 21px;
+    z-index: 100;
+    padding: 0.2rem 0;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px 0px;
+    border: 1px solid var(--white-color);
+}
+.nav-dropdown::after{
+    top: -6px;
+    right: 10px;
+    left: auto;
+    width: 10px;
+    height: 10px;
+    border-left: 1px solid var(--white-color);
+    border-top: 1px solid var(--white-color);
+    transform: rotateZ(45deg);
+    position: absolute;
+    display: inline-block;
+    content: " ";
+    background-color: white;
+    z-index: -1;
+}
+.nav-dropdown:nth-child(1){
+    right: 5.5vw;
+}
+.overlay:nth-child(5) .nav-dropdown{
+    right: 2.2vw;
+    width: 180px;
+}
+.overlay:nth-child(5) .nav-dropdown section{
+    padding: 0.5rem 0;
+    width: 100%;
+    border-bottom: 1px solid var(--white-color);
+}
+.overlay:nth-child(5) .nav-dropdown section:nth-child(4){
+    border: none;  
+    padding-bottom: 0
+}
+.overlay:nth-child(5) .nav-dropdown section:nth-child(1){
+    padding-left: 1rem;
+    cursor: pointer;
+    display: flex;
+    padding-top: 0.3rem;
+}
+.nav-dropdown section .status{
+    margin: 0 1rem;
+    width: auto;
+    height: 4.8vh;
+}
+.nav-dropdown-item{
+    color: var(--main-color);
+    padding: 0.25rem 0.5rem 0.25rem 1rem;
+    cursor: pointer;
+}
+.nav-dropdown-item:hover{
+    background-color: #1471db;
+    color: white;
 }
 /* Nav */
 nav{
@@ -186,6 +295,7 @@ nav .iconify{
 }
 #profile-pic{
     padding: 0 0.5rem 0.7rem 0;
+    
     /* border: solid; */
 }
 #profile-pic img{
@@ -193,6 +303,21 @@ nav .iconify{
     width: 90%;
     border-radius: 50%;
     cursor: pointer;
+}
+#profile .notification{
+    
+   
+}
+#profile .notification::after{
+    content: ' ';
+    background-color: var(--main-color); 
+    height: 10px;
+    width: 10px;
+    transform: rotateZ(45deg);
+    position: absolute;
+    top: -8%;
+    left: 45%;
+    right: 45%;  
 }
 #profile-name{
     padding-top: 0.5rem;
@@ -209,16 +334,18 @@ nav .iconify{
     line-height: 24px;
     color:  var(--sec-color);
 }
- #profile #status:hover{
+.status:hover{
     color: var(--link-color);
     cursor: pointer;
 
 }
-#status{
+.status{
     display: flex;
+    height: 32px;
     align-items: center;
+    overflow: hidden;
 }
-#status .iconify{
+.status .iconify{
     margin-right: 0.5rem;
     font-size: 16px;
     color: var(--sec-color);
@@ -228,10 +355,6 @@ nav .iconify{
     font-size: 15px;
     margin-right: 0.5rem;
 }
-#status-container .iconify{
-    
-}
-
 #profile .btn{
     color: var(--main-color);
     border: 1px solid var(--white-color);
@@ -272,7 +395,7 @@ nav .iconify{
     align-items: center;
 }
 .info{
-    margin-top: 1.5rem;
+    margin-top: 1.2rem;
     display: flex;
     flex-direction: column;
 }
@@ -320,20 +443,62 @@ nav .iconify{
     width: auto;
     box-shadow :rgba(27, 31, 35, 0.04) 0px 1px 0px 0px, rgba(255, 255, 255, 0.25) 0px 1px 0px 0px inset;
 }
+#fllw{
+    display: flex;
+    align-items: center;
+    margin-top: 0.5rem;
+    color: var(--sec-color);
+    flex-wrap: wrap;
+}
+.group{
+    display: flex;
+}
+#fllw .group:hover{
+    color: var(--link-color);
+    cursor: pointer;
+}
+#fllw .count, .star-count{
+    font-weight: 600;
+    color: var(--main-color);
+}
+.star-count{
+    margin-left: 0.3rem;
+    margin-bottom: 0.1rem;
+}
+#fllw p, .star-count{
+    font-size: 14px;
+}
+#fllw .iconify:nth-child(1),
+#fllw .iconify:nth-last-child(2){
+    margin-top: 0.2rem;
+}
+#fllw .iconify:nth-last-child(2){
+    margin-left: 0.2rem;
+}
+#fllw .dot{
+    margin: 0.3rem 0 0 0.2rem;
+    font-size: 4px;
+    display: flex;
+    
+    height: 10px;
+    align-self: center;
+    /* border: solid; */
+    
+}
 /* Tabs */
 #tabs{
     display: flex;
     border-bottom: solid 1px #d1d5da;
 }
-.tab:nth-child(1){
+.tab:nth-child(2){
     margin-left: 1rem;
 }
-.tab:nth-child(2){
+.tab:nth-child(3){
     font-weight: 600;
     display: flex;
     border-bottom-color: #f9826c;
 }
-.tab:nth-child(2):hover{
+.tab:nth-child(3):hover{
     border-bottom-color: #f9826c;
 }
 .counter{
@@ -380,14 +545,13 @@ nav .iconify{
 #search #btns{
     align-self: center;
     padding: .5rem 0;
-    display: grid;
+    display: flex;
     column-gap: .5rem;
     width: 100%;
-    grid-template-columns: 25% 30%;
 }
 #search .btn{
     color: var(--sec-color);  
-    padding: 6px 0;
+    padding: 6px 1.3rem;
     text-align: center;
 }
 #search .btn i{
@@ -396,17 +560,18 @@ nav .iconify{
     margin-top: 3px;
     color: var(--sec-color);
 }
+#search .btn:nth-child(1){
+    padding: 6px 1rem;
+}
 #search .btn:nth-child(3){
     color: white;
+    margin-left: auto;
+    padding: 6px 1rem;
 }
 #search .btn:nth-child(3) .iconify{
     font-size: 16px;
     margin: 2px 5px 0 0;
 }
-#search .bg-green{
-    grid-column: end;
-}
-
 /* Repos */
 #repos{
     display: flex;
@@ -420,7 +585,7 @@ nav .iconify{
     align-self: center;
     width: 100%;
     border-top: solid 1px var(--white-color);
-    padding: 1.68rem 0;
+    padding: 1.60rem 0;
 }
 #repos .repo .repo-name{
     color: var(--link-color);
@@ -429,17 +594,39 @@ nav .iconify{
     text-decoration: none;
     line-height: 1.5;
 }
+#repo-desc h3{
+    display: flex;
+}
+.description{
+    font-size: 14px;
+    color: var(--sec-color);
+    margin-bottom: 0.5rem;
+    margin-top: 0.3rem;
+}
+.private{
+    border-radius: 24px;
+    border: 1px solid var(--white-color);
+    color:  rgb(88, 96, 105);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 18px;
+    background-color: rgba(0, 0, 0, 0);
+    margin-left: 0.6rem;
+    padding: 0 0.5rem;
+    align-self: center;
+}
 #repos .repo .repo-name:hover{
     text-decoration: underline;
 }
 #repos .repo .desc{
     display: flex;
-    margin-top: 0.5rem;
+    margin-top: 0.9rem;
 }
 #repos .repo .desc .repo-language {
     margin-left: 0;
+    margin-right: 3px;
     position: relative;
-    top: 1px;
+    
     display: inline-block;
     width: 12px;
     height: 12px;
@@ -448,6 +635,14 @@ nav .iconify{
 #repos .repo .desc p{
     margin: 0 1rem 0 0;
     font-size: 12px;
+    color: rgb(88, 96, 105);
+    display: flex;
+    align-items: center;
+}
+#repos .repo .desc p .iconify{
+    width: 16px;
+    line-height: 18px;
+    font-size: 16px;
 }
 #repos .repo .star{
     font-size: 12px;
@@ -512,7 +707,7 @@ footer{
     flex-direction: column;
     border: 1px solid #d1d5da; 
     border-radius: 12px;
-    box-shadow: rgba(27, 31, 35, 0.4) 0px 0px 18px 0px
+    box-shadow: rgba(27, 31, 35, 0.4) 0px 0px 18px 0px;
 }
 .modal #top{
     font-size: 14px;
@@ -571,6 +766,7 @@ footer{
     padding: 0 1rem;  
     justify-content: flex-start;
     padding-top: 10vh;
+    background-color: rgba(0, 0, 0, 0.5);
 }
 #status-modal .modal-content{
     border-radius: 6px;
@@ -663,26 +859,30 @@ footer{
     margin-top: 0.6rem;
     margin-right: 0.35rem;
 }
-#p{
-    color: #6d7a8a;
+.p{
+    color: #565758;
     padding: 0;
     font-size: 12px;
     display: flex;
     margin-left: 1.7rem;
     margin-bottom: 1rem;
 }
+.add-on{
+    margin-left: 1rem;
+}
 #options{
     display: flex;
+    flex-wrap: wrap;
     border-top: solid 1px var(--white-color);
     border-bottom: solid 1px var(--white-color);
 }
-.status{
+.status-option{
     font-size: 14px;
     align-items: center;
     display: flex;
     padding: 1rem 1rem;
 }
-.status .btn{
+.status-option .btn{
     margin-left: 0.5rem;
     font-size: 12px;
     display: flex;
@@ -690,7 +890,7 @@ footer{
     align-content: center;
     padding: 0.2rem 0.6rem;
 }
-.status i{
+.status-option i{
     margin: 0.3rem 0 0 0.5rem;
 }
 #status-btns{
@@ -710,7 +910,7 @@ footer{
     border-radius: 6px;
     background-color: white;
     border: 1px solid #d1d5da;
-    position: absolute;
+    position: fixed;
     width: 220px;
     max-height: 186px;
     display: flex;
@@ -719,8 +919,9 @@ footer{
     padding: 4px 0;
     margin-top: 2px;
     overflow-y: auto;
-    top: 46.5%;
-    left: 240px;
+    top: 45.5%;
+    /* left: 33.5vw; */
+    right: 40vw;
 }
 .dropdown-option{
     text-decoration: none;
@@ -752,14 +953,14 @@ footer{
     display: flex;
     align-content: center;
 }
-#org{
+.org{
     width: 16px;
     height: 16px;
     line-height: 12px;
     margin-bottom: 4px;
     margin-right: 4px;
 }
-#org img{
+.org img{
     width: 100%;
     border-radius: 50%;
 }
@@ -772,3 +973,26 @@ footer{
 #lang-all .modal-content{
     width: 90%;
 }
+
+/* Media */
+@media screen and (max-width: 420px){
+    body{
+        width: 100vw !important;
+    }
+    .tab:nth-child(2){
+        margin-left: 0.5rem;
+    }
+    .tab{
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+}
+@media screen and (max-width: 360px){
+    body{
+        width: 100vw !important;
+    }
+    .tab, #btns .btn{
+        font-size: 11px;
+    }
+}
+

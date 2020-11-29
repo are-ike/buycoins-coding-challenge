@@ -1,11 +1,13 @@
-// const fetch = require('node-fetch');
-// import fetch from 'node-fetch';
-
-async function getData(string){
+async function getToken(){
+    const res = await fetch('https://arehush.herokuapp.com/get_token')
+    const token = await res.json();
+    return token;
+}
+async function getData(string, token){
     try{
         const response = await fetch('https://api.github.com/graphql',
         {method: "POST",
-        headers: {'Authorization' : 'bearer 79736b679c9b0c3d130fe8ab40c5d61ce4699b11'},
+        headers: {'Authorization' : `bearer ${token}`},
         body: JSON.stringify({query : string})
         });
         const json = await response.json();
@@ -16,7 +18,6 @@ async function getData(string){
         return;
     }
 }
-
 const largeScreen = () => {
     if(window.innerWidth >= 768){
         //Position Nav
@@ -26,7 +27,35 @@ const largeScreen = () => {
 
         //Editing nav-link
         document.querySelector('.nav-link:nth-child(3)').textContent = 'Pulls';
+        if(window.innerWidth >= 1012){
+            document.querySelector('.nav-link:nth-child(3)').textContent = 'Pull requests';
+            document.querySelector('nav').style.width= '690px';
+        }else{
+            document.querySelector('.nav-link:nth-child(3)').textContent = 'Pulls';
+            document.querySelector('nav').style.width= '600px';
+        }
 
+        //Position Following
+        const profile = document.querySelector('#profile');
+        profile.insertBefore(document.querySelector('#fllw').parentElement, profile.children[5]);
+        document.querySelector('#fllw').style.marginTop = '1rem';
+
+        //Tab
+        document.querySelector('.main').insertBefore(document.querySelector('.fixed-nav'), document.querySelector('.display'));
+
+        //Status
+        document.querySelector('.status:nth-child(2)').addEventListener('mouseenter', showStatus)
+        document.querySelector('.status:nth-child(2)').addEventListener('mouseleave', hideStatus)
+
+        document.querySelector('.status:nth-child(2)').style.width = '40px';
+        document.querySelector('.status:nth-child(2)').firstChild.style.marginRight = '1rem';
+
+        //Nav
+        document.addEventListener('scroll', fixedNav);
+
+        //Org
+        document.querySelector('#org-container').parentElement.classList.remove('d-none');
+        
     }else{
         //Reposition nav
         const nav = document.querySelector('nav');
@@ -36,21 +65,53 @@ const largeScreen = () => {
         //Editing nav-link
         document.querySelector('.nav-link:nth-child(3)').textContent = 'Pull requests';
 
+        //Position Following
+        const profile = document.querySelector('#profile');
+        profile.insertAdjacentElement('beforeend', document.querySelector('#fllw').parentElement);
+        document.querySelector('#fllw').style.marginTop = '0.5rem';
+
+        //Tab
+        document.querySelector('#left').insertAdjacentElement('afterend', document.querySelector('.fixed-nav'));
+
+        //Status
+        document.querySelector('.status:nth-child(2)').removeEventListener('mouseenter', showStatus);
+        document.querySelector('.status:nth-child(2)').removeEventListener('mouseleave', hideStatus);
+        document.querySelector('.status:nth-child(2)').style.width = '100%';
+        document.querySelector('.status:nth-child(2)').firstChild.style.marginRight = '0.5rem';
+
+         //Nav
+         document.removeEventListener('scroll', fixedNav);
+
+        //Org
+        document.querySelector('#org-container').parentElement.classList.add('d-none');
 
     }
     
 }
-
+const headerHover = (num, color) => {
+    const icons = Array.from(document.querySelector(`.header-group:nth-child(3) a:nth-child(${num})`).children);
+    icons.forEach(icon => {
+        icon.style.color = color;
+    });
+}
 const displayStatus = (res) => {
-    const {message, emojiHTML} = res.data.viewer.status,
-          status = document.querySelector('#status'),
-          div = document.createElement('div');
-    div.classList.add('status-emoji');
-    div.innerHTML = emojiHTML;
+    if(res.data.viewer.status !== null){
+        let {message, emojiHTML} = res.data.viewer.status,
+            status = document.querySelectorAll('.status');
+            if(emojiHTML === null){
+                emojiHTML = '💭';
+            }
+            
 
-    status.replaceChild(div, status.children[0]);
-    document.querySelector('.status-emoji').nextSibling.remove();
-    status.appendChild(document.createTextNode(message));
+        status.forEach((x, i) => {
+            const div = document.createElement('div');
+            div.classList.add('status-emoji');
+            div.innerHTML = emojiHTML;
+            x.replaceChild(div, x.children[0]);
+            document.querySelectorAll('.status-emoji')[i].nextSibling.remove();
+            x.appendChild(document.createTextNode(message));
+        });
+    }
 }
 const displayProfile = (res)=>{
     //Profile pic
@@ -101,23 +162,55 @@ const displayProfile = (res)=>{
     //Username for nav
     const username = document.createElement('p');
     username.appendChild(document.createTextNode(res.data.viewer.login));
+    const username2 = username.cloneNode(true);
+    const username3 = username2.cloneNode(true);
+    username2.classList.add('bold');
+    username3.classList.add('bold');
     document.querySelector('.nav-link:nth-last-child(2)').children[0].insertAdjacentElement('afterend', username);
-
+    document.querySelector('.nav-dropdown section:nth-child(1)').appendChild(username2);
+    document.querySelector('#nav-p').appendChild(username3);
 }
-
+const displayPrivate =(repos) => {
+    repos.forEach(repo => {
+        if(repo.isPrivate === true){
+            document.querySelectorAll('.repo-name').forEach(name => {
+                if(name.textContent === repo.name){
+                    const span = document.createElement('span');
+                    span.textContent = 'Private';
+                    span.classList.add('private');
+                    name.insertAdjacentElement('afterend', span);
+                }
+            })
+        }
+    });
+}
+const displayDesc = (repos) => {
+    repos.forEach(repo => {
+        if(repo.description !== null){
+            document.querySelectorAll('.repo-name').forEach(name => {
+                if(name.textContent === repo.name){
+                    const p = document.createElement('p');
+                    p.textContent = repo.description;
+                    p.classList.add('description');
+                    name.parentElement.insertAdjacentElement('afterend', p);
+                }
+            })
+        }
+    });
+}
 const displayRepos = (res) => {
     //get repos div
     let reposArray = res.data.viewer.repositories.nodes;
-    const repos = document.querySelector('#repos'),
-          extraRepos = reposArray;
-    console.log(extraRepos);
+    const repos = document.querySelector('#repos');
     let html = '';
-    reposArray.reverse().concat(extraRepos).forEach((repo, i) => {
+    reposArray.reverse().forEach((repo, i) => {
         if(repo.name !== 'find-it-frontend' && i < 21){
         //Setting lang color
             let color = repo.primaryLanguage.name === 'JavaScript' ? 'yellow': 'purple';
 
         //Updated at
+        let newDate;
+        if(dateFns.differenceInMonths(new Date(), repo.updatedAt) > 0){
             let date = (new Date(repo.updatedAt)).toDateString();//converting date to string
             date = date.split(' '); //converting date string to array
             date.shift(); //removing day
@@ -126,25 +219,27 @@ const displayRepos = (res) => {
             if(date[1][0] == 0){ 
                 date[1] = date[1].slice(1);
             }
-            //if updated less than a month ago&repository count
-
-            
-            //removing year if current year
-            let newDate = '';
-            if((new Date()).getFullYear() == date[2]){
-                date.pop(); //remove year
+            //removing year
+            let day;
+            if(dateFns.getYear(new Date()) == dateFns.getYear(repo.updatedAt)){
+                date.pop();
+                day = `${date[0]} ${date[1]}`;
+            }else{
+                day = `${date[0]} ${date[1]} ${date[2]}`;
             }
-            date.forEach(x => {
-                newDate += `${x} `;
-            });
-            // console.log(newDate);
+            newDate = `Updated on ${day}`;
+            
+        }else{
+            newDate = `Updated ${dateFns.differenceInDays(new Date(), repo.updatedAt)} days ago`;
+        }
             
             html += `
             <div class="repo">
                 <div id="repo-desc">
                     <h3><a href="#" class="repo-name">${repo.name}</a></h3>
                     <div class="desc">
-                        <p><span class="${color} repo-language"></span> ${repo.primaryLanguage.name}</p><p>Updated 17 days ago</p>
+                        <p><span class="${color} repo-language"></span> ${repo.primaryLanguage.name}</p>
+                        <p>${newDate}</p>
                     </div>
                 </div>
                 <a href="#" class="btn star"><span class="iconify" data-icon="octicon:star-16" data-inline="false"></span>Star</a>
@@ -155,36 +250,167 @@ const displayRepos = (res) => {
     });
     repos.innerHTML = html;
 
+    //Private
+    displayPrivate(reposArray);
+
+    //Description
+    displayDesc(reposArray);
+
+    //Repo Count
+    document.querySelector('.counter').textContent = document.querySelectorAll('.repo').length;
+
     //Star 
+    star(reposArray);
+
+    return reposArray.reverse(); 
+}
+const star = (reposArray) => {
     const unstar = '<span class="iconify unstar" data-icon="octicon:star-fill-16" data-inline="false"></span>Unstar',
           star = '<span class="iconify" data-icon="octicon:star-16" data-inline="false"></span>Star';
     document.querySelectorAll('.star').forEach((s, i) => {
         s.addEventListener('click', (e) => {
+             //Get ID
+            let id;
+                reposArray.forEach(repo => {
+                    if(document.querySelectorAll('.repo-name')[i].textContent === repo.name){
+                        id = repo.id;
+                    }
+                });
             if(s.children[0].classList.contains('unstar')){
                 s.innerHTML = star;
                 s.style.padding = '.3rem 0';
                 s.style.width = '67px';
+                getToken().then(res => {
+                    add_removeStar(`mutation{removeStar(input: {starrableId: "${id}"}){starrable{id}}}`, res.token)
+                    .then(() => {
+                        getData('{viewer{starredRepositories{nodes{name viewerHasStarred stargazerCount}} followers{totalCount}following{totalCount}}}', res.token)
+                        .then(res => {
+                            displayStarredRepos(res);
+                        })
+                    })
+                })
+                .catch(err => console.log(err));
+                
             }else{
                 s.innerHTML = unstar; 
                 s.style.padding = '.3rem .4rem';
                 s.style.width = '80px';
+                
+                getToken().then(res => {
+                    add_removeStar(`mutation{addStar(input: {starrableId: "${id}"}){starrable{id}}}`, res.token)
+                    .then(() => {
+                        getData('{viewer{starredRepositories{nodes{name viewerHasStarred stargazerCount}} followers{totalCount}following{totalCount}}}', res.token)
+                        .then(res => {
+                            displayStarredRepos(res);
+                        })
+                    })
+                })
+                .catch(err => console.log(err));
            }
+           
+           
            e.preventDefault();
         });
 
     });
-    return reposArray.reverse().concat(extraRepos); //plus extra repos
 }
+const displayStarredRepos = (res) => {
+    const {starredRepositories} = res.data.viewer;
+    if(document.querySelector('.stargazer-count')){
+        document.querySelectorAll('.stargazer-count').forEach(x => {
+            x.parentElement.remove();
+        });
+    }
+    showFollowing(res);
+    if(starredRepositories.nodes.length !== 0){
+        const nodes = starredRepositories.nodes;
+        nodes.forEach(node => {
+            document.querySelectorAll('.repo').forEach(repo => { 
+                if(node.name === repo.children[0].children[0].children[0].textContent){
+                    const icon = document.querySelector('.group:nth-child(5)').children[0].cloneNode(true);
+                    const p = document.createElement('p'),
+                          span = document.createElement('span');
+                    span.classList.add('stargazer-count');
+                    span.textContent = node.stargazerCount;
 
-//Events
+                    p.appendChild(icon);
+                    p.appendChild(span);
+                    repo.children[0].children[1].insertBefore(p, repo.children[0].children[1].children[1]);
+
+                    if(node.viewerHasStarred === true){
+                        const star = repo.children[repo.children.length - 1];
+                        star.innerHTML =
+                        '<span class="iconify unstar" data-icon="octicon:star-fill-16" data-inline="false"></span>Unstar';
+                        star.style.padding = '.3rem .4rem';
+                        star.style.width = '80px';
+                    }
+
+                }
+            });
+        });
+        
+    
+   
+
+    }
+}
 const nav = (e) => {
     //Show and Close Nav
     if(e.target.id === 'menu'){
-        e.target.parentElement.nextElementSibling.classList.toggle('d-none')
+        document.querySelector('nav').classList.toggle('d-none');
     }
-    
 }
+const fixedNav = () => {
+    if(window.scrollY >= 86){
+        document.querySelector('.fixed-nav').classList.add('fixed');
+        document.querySelector('#search').style.marginTop = '1.5rem'
+    }else{
+        document.querySelector('.fixed-nav').classList.remove('fixed')
+        document.querySelector('#search').style.marginTop = '0'
+    }
+    if(document.querySelector('#profile-pic img').getBoundingClientRect().bottom < 0){
+        document.querySelector('#nav-p').parentElement.classList.remove('d-none');
+    }else{
+        document.querySelector('#nav-p').parentElement.classList.add('d-none');
+    }
+}
+const showFollowing = (res) =>{
+    const {following, followers, starredRepositories} = res.data.viewer;
+    if(starredRepositories.nodes.length !== 0){
+        document.querySelector('#fllw').parentElement.classList.remove('d-none');
+        document.querySelectorAll('.count')[0].textContent = following.totalCount;
+        document.querySelectorAll('.count')[1].textContent = followers.totalCount;
+        document.querySelector('.star-count').textContent = starredRepositories.nodes.length;
 
+    }
+    else{
+        document.querySelector('#fllw').parentElement.classList.add('d-none');
+    }
+    // Hover
+    document.querySelectorAll('.group').forEach(grp => {
+        grp.addEventListener('mouseenter', () => {
+            grp.children[grp.children.length - 1].children[0].style.color = '#0366d6';
+        })
+        grp.addEventListener('mouseleave', () => {
+            grp.children[grp.children.length - 1].children[0].style.color = '#24292e';
+        });
+    });
+}
+async function add_removeStar(string, token){
+    try{
+        const response = await fetch('https://api.github.com/graphql',
+        {method: "POST",
+        headers: {'Authorization' : `bearer ${token}`},
+        body: JSON.stringify({query : string})
+        });
+        const json = await response.json();
+
+        return json;
+    }catch(e){
+        console.log(e);
+        return;
+    }
+}
 const editProfileFunctionality = () => {
     const saveBtn = document.querySelector('#save'),
           cancelBtn = document.querySelector('#cancel'),
@@ -192,12 +418,13 @@ const editProfileFunctionality = () => {
 
     saveBtn.addEventListener('click', (e) => {
         close(e);
-        save();
+        save(e);
+        e.preventDefault();
     });
     cancelBtn.addEventListener('click', close);
     editBtn.addEventListener('click', show);
 
-    function save (){
+    function save (e){
         //Bio
         const bio = document.querySelector('.bio');
         if(document.querySelector('textarea').value !== ''){
@@ -210,7 +437,12 @@ const editProfileFunctionality = () => {
         //Display Info
         document.querySelectorAll('.form-group input').forEach((x, i) => {
             if(x.value !== ''){
-                const infoItem = document.querySelector(`.info-item:nth-child(${i + 1})`);
+                if(i !== 3){
+                    const infoItem = document.querySelector(`.info-item:nth-child(${i + 1})`);
+                }else{
+                    const infoItem = document.querySelector(`.info-item:star-nth-child(${i + 1})`);
+
+                }
                 if(infoItem.hasChildNodes() === false){
                     const icon =  x.previousElementSibling.cloneNode(true);
                     infoItem.appendChild(icon);
@@ -235,7 +467,7 @@ const editProfileFunctionality = () => {
                 document.querySelector(`.info-item:nth-child(${i + 1})`).innerHTML= '';
             }
         });
-
+        e.preventDefault();
     }
     //Show Edit Profile
     function show(e){
@@ -252,6 +484,7 @@ const editProfileFunctionality = () => {
             e.target.parentElement.parentElement.previousElementSibling.classList.add('btn');
             e.target.parentElement.parentElement.classList.add('d-none')
         }
+        e.preventDefault();
     }
 }
 
@@ -280,7 +513,14 @@ const showModal = (e, btnId, modalId ) => {
        closeModal(modalId);
     }
 }
-
+const showStatus = () => {
+    document.querySelector('.status:nth-child(2)').style.width = 'auto';
+    document.querySelector('.status:nth-child(2)').firstChild.style.marginRight = '0.5rem'; 
+}
+const hideStatus = () => {
+    document.querySelector('.status:nth-child(2)').style.width = '40px';
+    document.querySelector('.status:nth-child(2)').firstChild.style.marginRight = '1rem'; 
+}
 const showStatusModal = (e) => {
     if(e.target.id = 'status'){
         document.querySelector('#status-modal').parentElement.classList.remove('d-none');
@@ -290,7 +530,17 @@ const showStatusModal = (e) => {
         closeModal('status-modal');
     }
 }
-
+const showMenuDropdown = (e, id, num) => {
+    if(e.target.id === id.slice(1) || document.querySelector(id).contains(e.target)){
+        const dropdown = document.querySelectorAll('.nav-dropdown')[num].parentElement;
+        dropdown.classList.remove('d-none');
+        document.addEventListener('click', (event) => {
+            if(event.target.classList.contains('overlay') || event.target.classList.contains('status')){
+                dropdown.classList.add('d-none');
+            }
+        });
+    }
+}
 const statusFunctionality = () => {
     //Suggestions
     const input = document.querySelector('#wh input'),
@@ -306,7 +556,7 @@ const statusFunctionality = () => {
     clrBtn.addEventListener('click', clrStatus);
     statusModal.addEventListener('click', dropDown);
     statusModal.addEventListener('mouseover', (e) =>{
-        if(smiley.contains(e.target)){
+        if(smiley.contains(e.target) && smiley.children.length !== 0){
             smiley.children[0].style.color = 'white';
         }else{
             smiley.children[0].style.color = '#586069';
@@ -334,13 +584,13 @@ const statusFunctionality = () => {
 
     //Busy
     document.querySelector('#busy').addEventListener('click', (e) => {
-        if(input.value === ''){
-            input.value = 'I may be slow to respond'; 
+        if(input.value === '' && document.querySelector('#busy').checked === true){
+            input.value = 'I may be slow to respond      '; 
             setBtn.classList.remove('set');
             if(suggestions.style.display !== 'none'){
                 suggestions.style.display = 'none';
             }
-        }else if(input.value === 'I may be slow to respond'){
+        }else if(input.value === 'I may be slow to respond      '  && document.querySelector('#busy').checked === false){
             input.value = '';
             suggestions.style.display = 'grid';
             setBtn.classList.add('set');
@@ -348,16 +598,15 @@ const statusFunctionality = () => {
     });
     
     //Set status
-    const status = document.querySelector('#status'),
-          div = document.createElement('div'),
-          icon = status.children[0];
+    const status = document.querySelectorAll('.status'),
+          icon = status[1].children[0];
           
 
-    async function mutateStatus(string){
+    async function mutateStatus(string, token){
         try{
             const response = await fetch('https://api.github.com/graphql',
             {method: "POST",
-            headers: {'Authorization' : 'bearer 79736b679c9b0c3d130fe8ab40c5d61ce4699b11'},
+            headers: {'Authorization' : `bearer ${token}`},
             body: JSON.stringify({query : string})
             });
             const json = await response.json();
@@ -372,54 +621,74 @@ const statusFunctionality = () => {
         if(!setBtn.classList.contains('set')){
             //Expires At
             const option = document.querySelector('#clear-status').childNodes[0].textContent;
-            let time;
+            const date = new Date();
+            let newDate;
             switch(option){
                 case 'Never':
-                    console.log('hi');
+                    newDate = null;
                     break;
                 case 'in 30 minutes':
-                    time = 30 * 60;
+                    newDate = dateFns.addMinutes(date, 30);
+                    break;
                 case 'in 1 hour':
-                    time = 60 * 60;
+                    newDate = dateFns.addHours(date, 1);
+                    break;
+                case 'in 4 hours':
+                    newDate = dateFns.addHours(date, 4);
+                    break;
                 case 'today':
-                    time = 'wait';
-
+                        newDate = dateFns.endOfDay(date);
+                        break;
                 case 'this week':
-                    time = 'sigh'
+                    newDate = dateFns.endOfWeek(date);
+                    break;
+                default:
+                    newDate = null;
+                    break;
             }
-            //write break
-            //do the calculation with time
-            //call mutate status
+            
+            status.forEach((x, i) => {
+                const div = document.createElement('div');
+                div.classList.add('status-emoji');
+                if(smiley.children.length === 1){
+                    div.appendChild(document.createTextNode('💭'));
+                }else{
+                    div.appendChild(document.createTextNode(smiley.textContent));    
+                }
 
-            div.classList.add('status-emoji');
-            status.style.height = '30px';
-
-            if(smiley.children.length === 1){
-                div.appendChild(document.createTextNode('💭'));
-            }else{
-                div.appendChild(document.createTextNode(smiley.textContent));    
-            }
-            status.replaceChild(div, status.children[0]);
-            document.querySelector('.status-emoji').nextSibling.remove();
-            status.appendChild(document.createTextNode(input.value));
+                x.replaceChild(div, x.children[0]);
+                document.querySelectorAll('.status-emoji')[i].nextSibling.remove();
+                x.appendChild(document.createTextNode(input.value));
+            });
 
             //Mutate Status
-            // mutateStatus(`mutation{changeUserStatus(input: {message:"${input.value}", expiresAt: "2020-11-22T22:04:00Z"}){ status{message expiresAt}}}`).then(x => {
-            //     console.log(x);
-            // });
+            let expiresAt;
+            if(newDate !== null){
+                expiresAt = new Date(dateFns.addHours(newDate, 1)).toISOString();
+                getToken().then(res => {
+                    mutateStatus(`mutation{changeUserStatus(input: {message:"${input.value}", expiresAt: "${expiresAt}"}){ status{message expiresAt}}}`, res.token).then(x => {
+                        console.log(x);
+                    });
+    
+                })
+                .catch(err => console.log(err));
+            }else{
+                expiresAt = null;
+            
+                getToken().then(res => {
+                    mutateStatus(`mutation{changeUserStatus(input: {message:"${input.value}", expiresAt: ${expiresAt}}){ status{message expiresAt}}}`, res.token).then(x => {
+                        console.log(x);
+                    });
 
-            
-            //Store Emoji
-            localStorage.setItem('emoji', `${div.childNodes[0].textContent}`);
+                })
+                .catch(err => console.log(err));
+            }
+
             //Close Modal
-            document.querySelector('#status-modal').parentElement.classList.add('d-none');  
-            
+            document.querySelector('#status-modal').parentElement.classList.add('d-none');
         }
     }
-/**Only members of CDC-Unilag will be able to see your status. main
- * closes to original choice in dropdown is same
-*/
-    //Clear status
+//Clear status
     function clrStatus(){
         document.querySelector('#status-modal').parentElement.classList.add('d-none');
         status.replaceChild(icon, status.children[0]);
@@ -430,27 +699,45 @@ const statusFunctionality = () => {
     //Dropdown
     function dropDown(e){
         if(e.target.id === 'clear-status'){
-            document.querySelector('#one.dropdown').parentElement.classList.remove('d-none');
-            dropdownFunctionality('#one.dropdown', 'clear-status');  
+            const dropdown = document.querySelector('#one.dropdown');
+            dropdown.parentElement.classList.remove('d-none');
+            dropdown.addEventListener('click', (e) => {
+                chooseOption(e, 'clear-status');
+                dropdown.parentElement.classList.add('d-none');
+            });
+            document.addEventListener('click', (e) => {
+                if(e.target.classList.contains('overlay')){
+                    dropdown.parentElement.classList.add('d-none');
+                }
+            });
         }
         if(e.target.id === 'visible-status'){
-            document.querySelector('#two.dropdown').parentElement.classList.remove('d-none');
-            dropdownFunctionality('#two.dropdown', 'visible-status');
+            const dropdown = document.querySelector('#two.dropdown');
+            dropdown.parentElement.classList.remove('d-none');
+            dropdown.addEventListener('click', (e) => {
+                chooseOption(e, 'visible-status');
+                if(document.querySelector('.add-on')){
+                    document.querySelectorAll('.add-on').forEach(x => {
+                        x.remove();
+                    });
+                }
+                
+                if(document.querySelector('#visible-status').firstChild.textContent === 'CDC Unilag'){
+                    const p = document.createElement('p');
+                    p.textContent = 'Only members of CDC-Unilag will be able to see your status.';
+                    p.classList.add('p', 'add-on');
+                    document.querySelector('#options').insertAdjacentElement('beforeend', p);
+                }    
+            });
+            
+            document.addEventListener('click', (e) => {
+                if(e.target.classList.contains('overlay')){
+                    dropdown.parentElement.classList.add('d-none');
+                }
+            });
         }
     }    
      
-    function dropdownFunctionality(str, id){
-        document.querySelector('#status-modal').addEventListener('click', (e) =>{
-            //Close dropdown
-            if(!document.querySelector(`${str}`).contains(e.target)){
-                document.querySelector(`${str}`).parentElement.classList.add('d-none');
-            }else{
-                chooseOption(e, id);
-            }
-           
-        });
-    }
-
     function chooseOption(e, id){
         document.querySelector(`#${id}`).childNodes[0].remove();
         document.querySelectorAll('.first-option').forEach(x => {
@@ -458,7 +745,7 @@ const statusFunctionality = () => {
                 document.querySelector(`#${id}`).insertBefore(document.createTextNode(x.children[0].textContent), document.querySelector(`#${id}`).children[0]);
             }
         });
-        if(document.querySelector('#org').contains(e.target) || e.target.id == 'org-img' || e.target.id == 'org'){
+        if(document.querySelector('.org').contains(e.target) || e.target.id == 'org-img' || e.target.classList.contains('org')){
             document.querySelector(`#${id}`).insertBefore(document.createTextNode(document.querySelector('#org').nextSibling.textContent), document.querySelector(`#${id}`).children[0]);
         }
         if(e.target.classList.contains('dropdown-option')){
@@ -473,85 +760,73 @@ const closeModal = (modalId) => {
         }
     });
 }
-const showNotification = (e) =>{
-    console.log('hi');
-}
+
 
 const main = () =>{
     window.addEventListener('resize', largeScreen);
     if(innerWidth >= 768){
-        largeScreen()
+        largeScreen();
     }
-    document.querySelector('body').addEventListener('click', nav); 
+    document.querySelector('#header').addEventListener('click', (e) => {
+        nav(e);
+        showMenuDropdown(e, '#plus', 0);
+        showMenuDropdown(e, '#p-pic', 1);
+    }); 
+
+    document.querySelector('#plus').addEventListener('mouseenter', () => {
+        headerHover(2, '#d1d5da');
+    });
+    document.querySelector('#plus').addEventListener('mouseleave', () => {
+        headerHover(2, 'white');
+    });
+    document.querySelector('#p-pic').addEventListener('mouseenter', () => {
+        headerHover(3, '#d1d5da');
+    });
+    document.querySelector('#p-pic').addEventListener('mouseleave', () => {
+        headerHover(3, 'white');
+    });
+
     document.addEventListener('click', (e) => {
         showModal(e, 'type', 'type-all');
         showModal(e, 'lang', 'lang-all');
     });
-    //lang
+   
     
-    document.querySelector('#status').addEventListener('click', showStatusModal);
-    // statusFunctionality(); //should be in status modal
-    // EditProfileFunctionality();
-    document.querySelector('#header').addEventListener('mouseover', showNotification );
+    document.querySelectorAll('.status').forEach(x =>{
+        x.addEventListener('click', showStatusModal);
+    });
+    document.querySelector('#bell').addEventListener('mouseenter', () => {
+        document.querySelector('.notification').classList.remove('d-none');
+    } );
+    document.querySelector('#bell').addEventListener('mouseleave', () => {
+        document.querySelector('.notification').classList.add('d-none');
+    } );
+    document.querySelector('#profile-pic img').addEventListener('mouseenter', () => {
+        document.querySelectorAll('.notification')[1].classList.remove('d-none');
+    });
+    document.querySelector('#profile-pic img').addEventListener('mouseleave', () => {
+        document.querySelectorAll('.notification')[1].classList.add('d-none');
+    });
 
-
-    getData('{viewer {login avatarUrl name repositories(last:15){totalCount nodes{name updatedAt primaryLanguage{name}}}status{message expiresAt emojiHTML} bio company location websiteUrl twitterUsername}}')
+    getToken().then(res => {
+    getData('{viewer {login avatarUrl name repositories(last:20){totalCount nodes{name updatedAt isPrivate description id primaryLanguage{name}}}status{message expiresAt emojiHTML} bio company location websiteUrl twitterUsername followers{totalCount}following{totalCount} starredRepositories{nodes{name viewerHasStarred stargazerCount}}}}', res.token)
         .then(response => {
             displayProfile(response);
             displayStatus(response);
             displayRepos(response);
+            displayStarredRepos(response);
+            //showPage
+            document.querySelector('#loader').remove();
+            document.querySelector('body').classList.remove('center-loader');
+            document.querySelector('.main').classList.remove('d-none');
         })
-        .catch(err => console.log(err));
+    })
+    .catch(err => console.log(err));
 }
-    
-
 main();
-/**
- *shownoti
- * 
- * set status and info with api
- * 
- */
-/**Status 
- * reposition dropdowm nd dropdown
 
-*/
-/**Edit Profile
- * 
- * 
- */
-/**Repo
- 
 
- 
- * updated at
- */
-/**Language all
-
- * 
- */
-/**type all
- 
- * fix btn to accomodate
- */
-/**Style
- * outline
- * transition
- * 
+/** dropdown position
  */
 
-/**lg */
 
-/**
- 
- * hover color for plus and img
- * dropdown padding
- * star position
- * star following
- * 
- * destructure
- * ************
- * create setbio etc
- * emoji options
- * tab border
- */
