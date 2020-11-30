@@ -228,7 +228,11 @@ const displayRepos = (res) => {
             newDate = `Updated on ${day}`;
 
         }else{
-            newDate = `Updated ${dateFns.differenceInDays(new Date(), repo.updatedAt)} days ago`;
+            if(dateFns.differenceInDays(new Date(), repo.updatedAt) < 1){
+                newDate = `Updated ${dateFns.differenceInHours(new Date(), repo.updatedAt)} hours ago`;
+            }else{
+                newDate = `Updated ${dateFns.differenceInDays(new Date(), repo.updatedAt)} days ago`;
+            }
         }
 
             html += `
