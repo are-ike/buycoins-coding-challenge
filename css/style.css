@@ -102,9 +102,7 @@ header .notification{
     margin-bottom: 0;
     padding-bottom: 0;
 }
-#profile-pic img{
-    z-index: 6;
-}
+
 .status:nth-child(2){
     z-index: 7;
     background-color: white;
@@ -329,26 +327,42 @@ footer{
     }
     .status:nth-child(2){
         top: 320px;
-        left: 27%;
+        left: 20%;
     }
 }
 @media screen and (min-width: 1354px){
     .tab:nth-child(2){
         margin-left: 30%;
     }
+    .status:nth-child(2){
+        top: 320px;
+        left: 22%;
+    }
 }
 @media screen and (min-width: 1500px){
     .tab:nth-child(2){
         margin-left: 31%;
+    }
+    .status:nth-child(2){
+        top: 320px;
+        left: 24%;
     }
 }
 @media screen and (min-width: 1600px){
     .tab:nth-child(2){
         margin-left: 32%;
     }
+    .status:nth-child(2){
+        top: 320px;
+        left: 26%;
+    }
 }
 @media screen and (min-width: 1700px){
     .tab:nth-child(2){
         margin-left: 33%;
+    }
+    .status:nth-child(2){
+        top: 320px;
+        left: 28%;
     }
 }

@@ -1,13 +1,11 @@
 async function getToken(){
-    const res = await fetch('https://arehush.herokuapp.com/get_token')
-    const token = await res.json();
-    return token;
+    return process.env.API_KEY
 }
-async function getData(string, token){
+async function getData(string){
     try{
         const response = await fetch('https://api.github.com/graphql',
         {method: "POST",
-        headers: {'Authorization' : `bearer ${token}`},
+        headers: {'Authorization' : `bearer ${process.env.API_KEY}`},
         body: JSON.stringify({query : string})
         });
         const json = await response.json();
@@ -55,7 +53,7 @@ const largeScreen = () => {
 
         //Org
         document.querySelector('#org-container').parentElement.classList.remove('d-none');
-        
+
     }else{
         //Reposition nav
         const nav = document.querySelector('nav');
@@ -86,7 +84,7 @@ const largeScreen = () => {
         document.querySelector('#org-container').parentElement.classList.add('d-none');
 
     }
-    
+
 }
 const headerHover = (num, color) => {
     const icons = Array.from(document.querySelector(`.header-group:nth-child(3) a:nth-child(${num})`).children);
@@ -101,7 +99,7 @@ const displayStatus = (res) => {
             if(emojiHTML === null){
                 emojiHTML = '💭';
             }
-            
+
 
         status.forEach((x, i) => {
             const div = document.createElement('div');
@@ -130,7 +128,7 @@ const displayProfile = (res)=>{
 
     //Info
     const {bio, company, location, websiteUrl, twitterUsername} = res.data.viewer;
-    
+
     const info = [company, location, websiteUrl, twitterUsername];
 
     if(company !== null){
@@ -158,7 +156,7 @@ const displayProfile = (res)=>{
         document.querySelector('textarea').value = bio;
     }
     editProfileFunctionality()
-    
+
     //Username for nav
     const username = document.createElement('p');
     username.appendChild(document.createTextNode(res.data.viewer.login));
@@ -204,7 +202,7 @@ const displayRepos = (res) => {
     const repos = document.querySelector('#repos');
     let html = '';
     reposArray.reverse().forEach((repo, i) => {
-        if(repo.name !== 'find-it-frontend' && i < 21){
+        if(repo.owner.login === 'are-ike' && i < 21){
         //Setting lang color
             let color = repo.primaryLanguage.name === 'JavaScript' ? 'yellow': 'purple';
 
@@ -216,7 +214,7 @@ const displayRepos = (res) => {
             date.shift(); //removing day
 
             //removing leading zeros
-            if(date[1][0] == 0){ 
+            if(date[1][0] == 0){
                 date[1] = date[1].slice(1);
             }
             //removing year
@@ -228,11 +226,11 @@ const displayRepos = (res) => {
                 day = `${date[0]} ${date[1]} ${date[2]}`;
             }
             newDate = `Updated on ${day}`;
-            
+
         }else{
             newDate = `Updated ${dateFns.differenceInDays(new Date(), repo.updatedAt)} days ago`;
         }
-            
+
             html += `
             <div class="repo">
                 <div id="repo-desc">
@@ -245,7 +243,7 @@ const displayRepos = (res) => {
                 <a href="#" class="btn star"><span class="iconify" data-icon="octicon:star-16" data-inline="false"></span>Star</a>
             </div>`;
 
-            
+
         }
     });
     repos.innerHTML = html;
@@ -259,10 +257,10 @@ const displayRepos = (res) => {
     //Repo Count
     document.querySelector('.counter').textContent = document.querySelectorAll('.repo').length;
 
-    //Star 
+    //Star
     star(reposArray);
 
-    return reposArray.reverse(); 
+    return reposArray.reverse();
 }
 const star = (reposArray) => {
     const unstar = '<span class="iconify unstar" data-icon="octicon:star-fill-16" data-inline="false"></span>Unstar',
@@ -281,25 +279,25 @@ const star = (reposArray) => {
                 s.style.padding = '.3rem 0';
                 s.style.width = '67px';
                 getToken().then(res => {
-                    add_removeStar(`mutation{removeStar(input: {starrableId: "${id}"}){starrable{id}}}`, res.token)
+                    add_removeStar(`mutation{removeStar(input: {starrableId: "${id}"}){starrable{id}}}`)
                     .then(() => {
-                        getData('{viewer{starredRepositories{nodes{name viewerHasStarred stargazerCount}} followers{totalCount}following{totalCount}}}', res.token)
+                        getData('{viewer{starredRepositories{nodes{name viewerHasStarred stargazerCount}} followers{totalCount}following{totalCount}}}')
                         .then(res => {
                             displayStarredRepos(res);
                         })
                     })
                 })
                 .catch(err => console.log(err));
-                
+
             }else{
-                s.innerHTML = unstar; 
+                s.innerHTML = unstar;
                 s.style.padding = '.3rem .4rem';
                 s.style.width = '80px';
-                
+
                 getToken().then(res => {
-                    add_removeStar(`mutation{addStar(input: {starrableId: "${id}"}){starrable{id}}}`, res.token)
+                    add_removeStar(`mutation{addStar(input: {starrableId: "${id}"}){starrable{id}}}`)
                     .then(() => {
-                        getData('{viewer{starredRepositories{nodes{name viewerHasStarred stargazerCount}} followers{totalCount}following{totalCount}}}', res.token)
+                        getData('{viewer{starredRepositories{nodes{name viewerHasStarred stargazerCount}} followers{totalCount}following{totalCount}}}')
                         .then(res => {
                             displayStarredRepos(res);
                         })
@@ -307,8 +305,8 @@ const star = (reposArray) => {
                 })
                 .catch(err => console.log(err));
            }
-           
-           
+
+
            e.preventDefault();
         });
 
@@ -325,7 +323,7 @@ const displayStarredRepos = (res) => {
     if(starredRepositories.nodes.length !== 0){
         const nodes = starredRepositories.nodes;
         nodes.forEach(node => {
-            document.querySelectorAll('.repo').forEach(repo => { 
+            document.querySelectorAll('.repo').forEach(repo => {
                 if(node.name === repo.children[0].children[0].children[0].textContent){
                     const icon = document.querySelector('.group:nth-child(5)').children[0].cloneNode(true);
                     const p = document.createElement('p'),
@@ -348,9 +346,9 @@ const displayStarredRepos = (res) => {
                 }
             });
         });
-        
-    
-   
+
+
+
 
     }
 }
@@ -396,11 +394,11 @@ const showFollowing = (res) =>{
         });
     });
 }
-async function add_removeStar(string, token){
+async function add_removeStar(string){
     try{
         const response = await fetch('https://api.github.com/graphql',
         {method: "POST",
-        headers: {'Authorization' : `bearer ${token}`},
+        headers: {'Authorization' : `bearer ${process.env.API_KEY}`},
         body: JSON.stringify({query : string})
         });
         const json = await response.json();
@@ -446,7 +444,7 @@ const editProfileFunctionality = () => {
                 if(infoItem.hasChildNodes() === false){
                     const icon =  x.previousElementSibling.cloneNode(true);
                     infoItem.appendChild(icon);
-                    
+
                     if(x.placeholder == 'Twitter username'){
                         infoItem.appendChild(document.createTextNode(`@${x.value}`));
                     }else{
@@ -500,7 +498,7 @@ const modalFunctionality = (btnId, modalId) =>{
 
             document.querySelector(`#${btnId} .checked-value`).textContent = p.textContent;
             document.querySelector(`#${modalId}`).parentElement.classList.add('d-none');
- 
+
         });
     });
 }
@@ -515,11 +513,11 @@ const showModal = (e, btnId, modalId ) => {
 }
 const showStatus = () => {
     document.querySelector('.status:nth-child(2)').style.width = 'auto';
-    document.querySelector('.status:nth-child(2)').firstChild.style.marginRight = '0.5rem'; 
+    document.querySelector('.status:nth-child(2)').firstChild.style.marginRight = '0.5rem';
 }
 const hideStatus = () => {
     document.querySelector('.status:nth-child(2)').style.width = '40px';
-    document.querySelector('.status:nth-child(2)').firstChild.style.marginRight = '1rem'; 
+    document.querySelector('.status:nth-child(2)').firstChild.style.marginRight = '1rem';
 }
 const showStatusModal = (e) => {
     if(e.target.id = 'status'){
@@ -562,11 +560,11 @@ const statusFunctionality = () => {
             smiley.children[0].style.color = '#586069';
         }
     })
-    
+
 
     suggestions.addEventListener('click', (e) => {
         if(e.target.id = 'suggestion'){
-            input.value = e.target.textContent; 
+            input.value = e.target.textContent;
             smiley.innerText = e.target.previousElementSibling.textContent;
             displaySuggestions();
         }
@@ -585,7 +583,7 @@ const statusFunctionality = () => {
     //Busy
     document.querySelector('#busy').addEventListener('click', (e) => {
         if(input.value === '' && document.querySelector('#busy').checked === true){
-            input.value = 'I may be slow to respond      '; 
+            input.value = 'I may be slow to respond      ';
             setBtn.classList.remove('set');
             if(suggestions.style.display !== 'none'){
                 suggestions.style.display = 'none';
@@ -594,23 +592,23 @@ const statusFunctionality = () => {
             input.value = '';
             suggestions.style.display = 'grid';
             setBtn.classList.add('set');
-        }       
+        }
     });
-    
+
     //Set status
     const status = document.querySelectorAll('.status'),
           icon = status[1].children[0];
-          
 
-    async function mutateStatus(string, token){
+
+    async function mutateStatus(string){
         try{
             const response = await fetch('https://api.github.com/graphql',
             {method: "POST",
-            headers: {'Authorization' : `bearer ${token}`},
+            headers: {'Authorization' : `bearer ${process.env.API_KEY}`},
             body: JSON.stringify({query : string})
             });
             const json = await response.json();
-    
+
             return json;
         }catch(e){
             console.log(e);
@@ -646,14 +644,14 @@ const statusFunctionality = () => {
                     newDate = null;
                     break;
             }
-            
+
             status.forEach((x, i) => {
                 const div = document.createElement('div');
                 div.classList.add('status-emoji');
                 if(smiley.children.length === 1){
                     div.appendChild(document.createTextNode('💭'));
                 }else{
-                    div.appendChild(document.createTextNode(smiley.textContent));    
+                    div.appendChild(document.createTextNode(smiley.textContent));
                 }
 
                 x.replaceChild(div, x.children[0]);
@@ -666,17 +664,17 @@ const statusFunctionality = () => {
             if(newDate !== null){
                 expiresAt = new Date(dateFns.addHours(newDate, 1)).toISOString();
                 getToken().then(res => {
-                    mutateStatus(`mutation{changeUserStatus(input: {message:"${input.value}", expiresAt: "${expiresAt}"}){ status{message expiresAt}}}`, res.token).then(x => {
+                    mutateStatus(`mutation{changeUserStatus(input: {message:"${input.value}", expiresAt: "${expiresAt}"}){ status{message expiresAt}}}`).then(x => {
                         console.log(x);
                     });
-    
+
                 })
                 .catch(err => console.log(err));
             }else{
                 expiresAt = null;
-            
+
                 getToken().then(res => {
-                    mutateStatus(`mutation{changeUserStatus(input: {message:"${input.value}", expiresAt: ${expiresAt}}){ status{message expiresAt}}}`, res.token).then(x => {
+                    mutateStatus(`mutation{changeUserStatus(input: {message:"${input.value}", expiresAt: ${expiresAt}}){ status{message expiresAt}}}`).then(x => {
                         console.log(x);
                     });
 
@@ -721,23 +719,23 @@ const statusFunctionality = () => {
                         x.remove();
                     });
                 }
-                
+
                 if(document.querySelector('#visible-status').firstChild.textContent === 'CDC Unilag'){
                     const p = document.createElement('p');
                     p.textContent = 'Only members of CDC-Unilag will be able to see your status.';
                     p.classList.add('p', 'add-on');
                     document.querySelector('#options').insertAdjacentElement('beforeend', p);
-                }    
+                }
             });
-            
+
             document.addEventListener('click', (e) => {
                 if(e.target.classList.contains('overlay')){
                     dropdown.parentElement.classList.add('d-none');
                 }
             });
         }
-    }    
-     
+    }
+
     function chooseOption(e, id){
         document.querySelector(`#${id}`).childNodes[0].remove();
         document.querySelectorAll('.first-option').forEach(x => {
@@ -756,7 +754,7 @@ const statusFunctionality = () => {
 const closeModal = (modalId) => {
     document.addEventListener('click', (e) => {
         if(e.target.classList.contains('modal')|| e.target.id === 'close'){
-            document.querySelector(`#${modalId}`).parentElement.classList.add('d-none');   
+            document.querySelector(`#${modalId}`).parentElement.classList.add('d-none');
         }
     });
 }
@@ -771,7 +769,7 @@ const main = () =>{
         nav(e);
         showMenuDropdown(e, '#plus', 0);
         showMenuDropdown(e, '#p-pic', 1);
-    }); 
+    });
 
     document.querySelector('#plus').addEventListener('mouseenter', () => {
         headerHover(2, '#d1d5da');
@@ -790,8 +788,8 @@ const main = () =>{
         showModal(e, 'type', 'type-all');
         showModal(e, 'lang', 'lang-all');
     });
-   
-    
+
+
     document.querySelectorAll('.status').forEach(x =>{
         x.addEventListener('click', showStatusModal);
     });
@@ -809,7 +807,7 @@ const main = () =>{
     });
 
     getToken().then(res => {
-    getData('{viewer {login avatarUrl name repositories(last:20){totalCount nodes{name updatedAt isPrivate description id primaryLanguage{name}}}status{message expiresAt emojiHTML} bio company location websiteUrl twitterUsername followers{totalCount}following{totalCount} starredRepositories{nodes{name viewerHasStarred stargazerCount}}}}', res.token)
+    getData('{viewer {login avatarUrl name repositories(last:20){totalCount nodes{name updatedAt isPrivate description owner {login} id primaryLanguage{name}}}status{message expiresAt emojiHTML} bio company location websiteUrl twitterUsername followers{totalCount}following{totalCount} starredRepositories{nodes{name viewerHasStarred stargazerCount}}}}')
         .then(response => {
             displayProfile(response);
             displayStatus(response);

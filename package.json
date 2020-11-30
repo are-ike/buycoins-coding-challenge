@@ -1,0 +1,36 @@
+{
+  "name": "github-repo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "parcel index.html",
+    "create-env": "node scripts/create-env.js",
+    "build-parcel": "parcel build index.html",
+    "build:netlify": "npm-run-all create-env build-parcel",
+    "build:local": "npm-run-all build-parcel"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/are-ike/github-repo.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/are-ike/github-repo/issues"
+  },
+  "homepage": "https://github.com/are-ike/github-repo#readme",
+  "dependencies": {
+    "npm-run-all": "^4.1.5",
+    "parcel-bundler": "^1.12.4"
+  },
+  "browserslist": [
+    "last 3 and_chr versions",
+    "last 3 chrome versions",
+    "last 3 opera versions",
+    "last 3 ios_saf versions",
+    "last 3 safari versions"
+  ]
+}
