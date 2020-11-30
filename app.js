@@ -8,7 +8,7 @@ async function getData(string){
         headers: {'Authorization' : `bearer ${process.env.API_KEY}`},
         body: JSON.stringify({query : string})
         });
-        const json = await response.json();
+        const json = await response.json(); 
 
         return json;
     }catch(e){
